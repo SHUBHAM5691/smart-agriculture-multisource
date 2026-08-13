@@ -1,0 +1,6 @@
+{
+  "fingerprint": "62b7fe23c65bb843d543f8589cab2b1fd298386bb1e6055574068a05522659f0",
+  "chunk_count": 2416,
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "dimension": 384
+}

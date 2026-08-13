@@ -1,0 +1,37 @@
+[
+  {
+    "id": "icar_nrm_2014",
+    "name": "ICAR Natural Resource Management Technologies",
+    "url": "https://icar.org.in/sites/default/files/2023-02/NRM-2702.pdf",
+    "kind": "pdf",
+    "scope": "India",
+    "publication_year": 2014,
+    "default_topics": ["soil", "nutrients", "water", "farming systems"]
+  },
+  {
+    "id": "vikaspedia_package_of_practices",
+    "name": "Vikaspedia Package of Practices",
+    "url": "https://en.vikaspedia.in/viewcontent/agriculture/crop-production/package-of-practices?lgn=en",
+    "kind": "html",
+    "scope": "India",
+    "default_topics": ["crop production", "package of practices"]
+  },
+  {
+    "id": "tnau_agriculture_2020",
+    "name": "TNAU Crop Production Guide - Agriculture 2020",
+    "url": "https://agritech.tnau.ac.in/pdf/AGRICULTURE.pdf",
+    "kind": "pdf",
+    "state": "Tamil Nadu",
+    "publication_year": 2020,
+    "default_topics": ["field crops", "crop production"]
+  },
+  {
+    "id": "tnau_horticulture_2020",
+    "name": "TNAU Crop Production Guide - Horticulture 2020",
+    "url": "https://agritech.tnau.ac.in/pdf/HORTICULTURE.pdf",
+    "kind": "pdf",
+    "state": "Tamil Nadu",
+    "publication_year": 2020,
+    "default_topics": ["horticulture", "crop production"]
+  }
+]

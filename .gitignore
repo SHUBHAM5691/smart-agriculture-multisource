@@ -1,0 +1,14 @@
+.env
+.venv/
+.venv314/
+__pycache__/
+*.pyc
+.DS_Store
+data/downloads/
+
+# Deployment assets: keep the prepared corpus and persistent FAISS index in Git.
+# This prevents Streamlit cold starts from rebuilding all document embeddings.
+!data/knowledge/chunks.jsonl
+!data/vector_index/
+!data/vector_index/knowledge.faiss
+!data/vector_index/metadata.json

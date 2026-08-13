@@ -1,0 +1,35 @@
+SMART AGRICULTURE KNOWLEDGE BASE
+Educational prototype for Rice, Wheat, and Maize
+
+IMPORTANT
+This material provides general educational guidance. Farm decisions must be adapted to local soil tests, crop variety, season, weather, irrigation availability, pest pressure, and advice from local agricultural universities, Krishi Vigyan Kendras, or extension officers. Pesticide products and dosages must follow current labels and local regulations.
+
+GENERAL FARM PLANNING
+A cultivation plan should begin with crop, field location, season, soil type, water availability, and farmer objective. Soil testing is preferable before deciding nutrient quantities. Keep records of sowing date, variety, seed source, fertilizer, irrigation, rainfall, pests, yield, and unusual weather. Do not decide suitability from crop name alone; local planting window, variety duration, climate, market access, and water availability matter.
+
+SOIL HEALTH
+Healthy soil needs suitable structure, drainage, organic matter, and biological activity. Excess tillage may increase erosion. Poor drainage restricts roots. Well-decomposed organic matter can improve structure and water-holding capacity, but its nutrient contribution varies. Soil pH affects nutrient availability; amendments should follow soil analysis and local recommendations. Raised beds or drainage channels can help where waterlogging is common.
+
+IRRIGATION
+Irrigation should respond to crop stage, soil moisture, rooting depth, recent rain, forecast, and drainage. Fixed calendar irrigation can waste water. Over-irrigation may cause nutrient loss, waterlogging, root disease, and unnecessary energy use. Observe moisture below the surface, plant wilting, leaf rolling, and recent rainfall. Water quality matters where salinity is a concern.
+
+NUTRIENT MANAGEMENT
+Combine soil-test information, realistic yield target, crop requirement, previous crop, organic inputs, and local recommendations. Nitrogen often benefits from split application. Visible symptoms alone may not identify deficiency because yellowing can also result from waterlogging, root injury, disease, or ageing. Avoid placing fertilizer in direct seed contact when salt injury is possible. Avoid application just before heavy rain.
+
+INTEGRATED PEST MANAGEMENT
+Use clean seed, resistant varieties where suitable, crop rotation, balanced nutrition, sanitation, and regular scouting. Correct identification is essential because insects, pathogens, nutrient deficiency, herbicide injury, drought, and waterlogging can look similar. Combine biological, cultural, mechanical, and chemical methods. Chemical control should follow confirmed diagnosis, economic need, current labels, safety precautions, and local regulations.
+
+RICE
+Rice is commonly grown in warm conditions and may be transplanted or direct seeded. Establishment method depends on labour, water, soil, weeds, and local practice. Direct-seeded rice may save labour and water but often needs stronger early weed management. Avoid both prolonged moisture stress and unnecessary deep standing water. Sensitive periods include establishment, active tillering, flowering, and grain formation. Nitrogen is commonly split across stages. Excess nitrogen can increase lodging and susceptibility to some pests and diseases. Important problems include weeds, stem borers, leaf folders, planthoppers, blast, sheath blight, and nutrient disorders. Confirm the cause before selecting control. Harvest when most grains are mature and dry grain safely before storage.
+
+WHEAT
+Wheat generally performs best in a cool season with timely sowing. Delayed sowing can expose grain filling to heat. Match variety to region, sowing time, irrigation, and disease risk. A firm moist seedbed and uniform depth support establishment. Water stress at crown-root initiation can reduce root and tiller development; flowering and grain filling are also important. Avoid waterlogging. Nitrogen is commonly split, while other nutrients should follow soil testing. Important problems include weeds, termites, aphids, rusts, loose smut, and heat stress. Harvest mature grain and dry it before storage.
+
+MAIZE
+Maize generally performs well in fertile, well-drained soil and is sensitive to prolonged waterlogging. Select hybrid or variety according to maturity duration, local climate, disease risk, intended use, and irrigation. Uniform planting depth and spacing help establishment. Early weed control is important. Moisture stress can be especially damaging near tasselling, silking, and early grain development. Balanced nutrition is essential, and split nitrogen may improve efficiency. Important problems include fall armyworm, stem borers, leaf blights, downy mildew, stalk rots, and storage insects. For fall armyworm, scout young plants and whorls for fresh feeding and frass, then use integrated locally approved management when justified. Harvest timing depends on whether the crop is for green cobs, fodder, silage, or grain.
+
+WEATHER-AWARE CULTIVATION
+Forecasts are decision aids, not guarantees. Before heavy rain, avoid unnecessary irrigation and inputs likely to wash away, and check drainage. After heavy rain, inspect for waterlogging, erosion, lodging, nutrient-loss symptoms, and disease-favouring humidity. During heat, prioritize sensitive crop stages. High humidity and prolonged leaf wetness can favour disease, so increased scouting may be more useful than automatic spraying. Strong wind can make spraying unsafe or ineffective.
+
+HARVEST AND STORAGE
+Harvest maturity depends on crop and intended use. Wet grain must be dried promptly; delayed field harvest can increase shattering, lodging, pest, and rain damage. Storage should be clean, dry, and protected from rodents and moisture. Inspect stored produce for insects, heating, mould, or moisture. Suspected mould contamination should be assessed with appropriate local guidance.
