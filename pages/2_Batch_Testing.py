@@ -10,9 +10,9 @@ st.set_page_config(page_title="Batch Testing | Smart Agriculture", page_icon="ðŸ
 
 CROP_TEMPLATE = pd.DataFrame([
     {"nitrogen": 90, "phosphorus": 42, "potassium": 43, "temperature": 25,
-     "humidity": 80, "ph": 6.5, "rainfall": 200, "advisory_state": "Maharashtra"},
+     "humidity": 80, "ph": 6.5, "rainfall": 200},
     {"nitrogen": 78, "phosphorus": 45, "potassium": 20, "temperature": 24,
-     "humidity": 65, "ph": 6.4, "rainfall": 85, "advisory_state": "Madhya Pradesh"},
+     "humidity": 65, "ph": 6.4, "rainfall": 85},
 ])
 
 FERTILIZER_TEMPLATE = pd.DataFrame([{
@@ -23,7 +23,6 @@ FERTILIZER_TEMPLATE = pd.DataFrame([{
     "crop_growth_stage": "Vegetative", "irrigation_type": "Canal",
     "previous_crop": "Wheat", "region": "South",
     "fertilizer_used_last_season": 100, "yield_last_season": 3.0,
-    "advisory_state": "Tamil Nadu",
 }])
 
 YIELD_TEMPLATE = pd.DataFrame([{
