@@ -19,3 +19,4 @@ pypdf>=5.0
 beautifulsoup4>=4.12
 groq>=0.30
 edge-tts>=7.2
+streamlit-geolocation==0.0.10

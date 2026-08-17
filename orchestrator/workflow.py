@@ -7,7 +7,7 @@ from prediction.real_model import RealCropModel
 from prediction.real_predictors import RealYieldModel
 from prediction.fertilizer_subprocess import predict_fertilizer
 from rag.retriever import retrieve_with_diagnostics
-from rag.imd_advisory import retrieve_live_advisory, wants_live_advisory
+from rag.imd_advisory import identify_state, retrieve_live_advisory, wants_live_advisory
 
 logger = logging.getLogger(__name__)
 _CONTEXT_MESSAGE_LIMIT = 8
@@ -81,13 +81,21 @@ def answer_question(question: str, response_language: str | None = None) -> dict
     add_message("user", question)
     try:
         memory = _recent_memory(get_memory())
+        prediction_inputs = (memory.get("prediction") or {}).get("inputs", {})
+        advisory_state = (
+            identify_state(question)
+            or prediction_inputs.get("advisory_state")
+            or prediction_inputs.get("state")
+        )
         rag_decision = decide_rag(question, memory)
         rag_docs, rag_error = [], None
 
         if wants_live_advisory(question):
             rag_docs, rag_error = retrieve_live_advisory(question, memory.get("prediction"))
         elif rag_decision["needs_rag"]:
-            rag_docs, rag_error = retrieve_with_diagnostics(rag_decision["retrieval_query"])
+            rag_docs, rag_error = retrieve_with_diagnostics(
+                rag_decision["retrieval_query"], state=advisory_state
+            )
 
         answer = compose_answer(question, memory, rag_docs, response_language=response_language)
         add_message("assistant", answer)
@@ -98,6 +106,7 @@ def answer_question(question: str, response_language: str | None = None) -> dict
                 "rag_decision": rag_decision,
                 "rag_executed": bool(rag_docs),
                 "rag_error": rag_error,
+                "advisory_state": advisory_state,
                 "live_imd": bool(rag_docs and rag_docs[0].get("live")),
             },
         }

@@ -62,7 +62,7 @@ class WorkflowTests(unittest.TestCase):
 
         result = answer_question("more info about it")
 
-        retrieve.assert_called_once_with("rice cultivation")
+        retrieve.assert_called_once_with("rice cultivation", state=None)
         self.assertTrue(result["trace"]["rag_executed"])
 
     @patch(
@@ -103,7 +103,9 @@ class WorkflowTests(unittest.TestCase):
 
         answer_question("share more information about it")
 
-        retrieve.assert_called_once_with("maize cultivation irrigation nutrients pests guidance")
+        retrieve.assert_called_once_with(
+            "maize cultivation irrigation nutrients pests guidance", state=None
+        )
 
     @patch("llm.composer.generate_text", side_effect=TimeoutError("generation timed out"))
     def test_composer_fallback_displays_provider_error(self, _generate):

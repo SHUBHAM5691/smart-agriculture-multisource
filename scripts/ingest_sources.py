@@ -30,6 +30,44 @@ TOPICS = (
     "harvest", "storage", "weather", "variety", "sowing", "seed", "water",
 )
 
+# One-based physical PDF pages where each state section begins. The ICAR PDF
+# contains duplicated physical pages, so only every second page is retained.
+KHARIF_SECTION_STARTS = [
+    (16, ["Andaman and Nicobar Islands"]),
+    (22, ["Andhra Pradesh"]),
+    (34, ["Arunachal Pradesh"]),
+    (40, ["Assam"]),
+    (48, ["Bihar"]),
+    (56, ["Chhattisgarh"]),
+    (62, ["Goa"]),
+    (66, ["Gujarat"]),
+    (78, ["Haryana", "Delhi"]),
+    (84, ["Himachal Pradesh"]),
+    (100, ["Jammu and Kashmir"]),
+    (120, ["Jharkhand"]),
+    (126, ["Karnataka"]),
+    (136, ["Kerala"]),
+    (142, ["Ladakh"]),
+    (146, ["Lakshadweep"]),
+    (150, ["Madhya Pradesh"]),
+    (156, ["Maharashtra"]),
+    (178, ["Manipur"]),
+    (184, ["Meghalaya"]),
+    (188, ["Mizoram"]),
+    (194, ["Nagaland"]),
+    (204, ["Odisha"]),
+    (208, ["Punjab"]),
+    (226, ["Rajasthan"]),
+    (250, ["Sikkim"]),
+    (254, ["Tamil Nadu", "Puducherry"]),
+    (260, ["Telangana"]),
+    (266, ["Tripura"]),
+    (274, ["Uttar Pradesh"]),
+    (280, ["Uttarakhand"]),
+    (296, ["West Bengal"]),
+    (308, []),
+]
+
 
 def fetch(url: str) -> bytes:
     request = Request(url, headers={"User-Agent": USER_AGENT})
@@ -55,6 +93,22 @@ def pdf_pages(raw: bytes, source_id: str) -> list[tuple[int | None, str]]:
     path = DOWNLOADS / f"{source_id}.pdf"
     path.write_bytes(raw)
     return [(number, clean_text(page.extract_text() or "")) for number, page in enumerate(PdfReader(path).pages, 1)]
+
+
+def kharif_state_documents(raw: bytes, source: dict) -> list[tuple[dict, list[tuple[int | None, str]]]]:
+    pages = pdf_pages(raw, source["id"])
+    documents = []
+    for section_index, (start_page, states) in enumerate(KHARIF_SECTION_STARTS[:-1]):
+        end_page = KHARIF_SECTION_STARTS[section_index + 1][0]
+        # The official PDF repeats each extracted physical page twice.
+        unique_pages = pages[start_page - 1:end_page - 1:2]
+        for state in states:
+            documents.append(({
+                **source,
+                "name": f"{source['name']} - {state}",
+                "state": state,
+            }, unique_pages))
+    return documents
 
 
 def html_pages(raw: bytes) -> list[tuple[int | None, str]]:
@@ -115,6 +169,7 @@ def build_chunks(source: dict, pages: list[tuple[int | None, str]]) -> list[dict
                 "state": source.get("state"),
                 "scope": source.get("scope"),
                 "publication_year": source.get("publication_year"),
+                "season": source.get("season"),
                 "crops": infer_tags(content, CROPS),
                 "topics": sorted(set(source.get("default_topics", []) + infer_tags(content, TOPICS))),
             })
@@ -125,16 +180,24 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", action="append", help="Only ingest the named source id; repeatable")
     parser.add_argument("--output", type=Path, default=OUTPUT)
+    parser.add_argument("--append", action="store_true", help="Replace selected sources while preserving other existing chunks")
     args = parser.parse_args()
     sources = json.loads(MANIFEST.read_text(encoding="utf-8"))
     selected = set(args.source or [])
     records = []
+    if args.append and args.output.exists():
+        for line in args.output.read_text(encoding="utf-8").splitlines():
+            record = json.loads(line)
+            if record.get("source_id") not in selected:
+                records.append(record)
     for source in sources:
         if selected and source["id"] not in selected:
             continue
         print(f"Downloading {source['name']}...", file=sys.stderr)
         raw = fetch(source["url"])
-        if source["kind"] == "pdf":
+        if source["kind"] == "state_sectioned_pdf":
+            documents = kharif_state_documents(raw, source)
+        elif source["kind"] == "pdf":
             documents = [(source, pdf_pages(raw, source["id"]))]
         elif source["id"] == "vikaspedia_package_of_practices":
             documents = vikaspedia_documents(raw, source)

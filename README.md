@@ -119,7 +119,7 @@ Configure the Groq API in `.env`. Never commit this file or send the key in chat
 ```env
 GROQ_API_KEY=your_real_groq_api_key
 GROQ_BASE_URL=https://api.groq.com/openai/v1
-GROQ_MODEL=llama-3.3-70b-versatile
+GROQ_MODEL=openai/gpt-oss-120b
 GROQ_TIMEOUT=60
 GROQ_MAX_RETRIES=3
 GROQ_ASR_MODEL=whisper-large-v3
@@ -133,11 +133,35 @@ DEBUG=true
 Run:
 
 ```bash
+source .venv/bin/activate
 ./run_app.sh
 ```
 
-This edition runs on port `8503`, so it can run beside the original project on
-port `8502`. The `.gitignore` excludes `.env` and `.venv`.
+This edition runs locally on port `8504`. The `.gitignore` excludes `.env` and `.venv`.
+
+## M6 deployment interface
+
+The Streamlit sidebar exposes three pages:
+
+- `app` — single-record prediction, labelled presets, SHAP and voice/text follow-ups.
+- `How to Use` — dedicated instructions, examples, input notes and troubleshooting.
+- `Batch Testing` — downloadable CSV templates, validation, a 50-row batch limit,
+  prediction preview and downloadable results.
+
+Uploaded CSV files are processed only for the current Streamlit session. They are not
+added to the RAG corpus or persistent FAISS index. On Streamlit Community Cloud, set
+`GROQ_API_KEY` and the other values from `.env.example` through application Secrets;
+never upload or commit the local `.env` file.
+
+For Jenkins, configure `GROQ_API_KEY` as a secret credential/environment variable,
+use Python 3.12, install `requirements.txt`, and launch `./run_app.sh`. The script
+uses `$PORT` when Jenkins or the hosting platform supplies it and otherwise uses 8504.
+
+Crop and fertilizer forms also accept an optional advisory state/district. A user may
+explicitly opt in to the browser geolocation component, which returns coordinates only
+after the browser permission prompt is approved. Location is stored in the current
+prediction session for advisory routing; it is not silently added as a feature to models
+that were trained without location.
 
 ## Example queries
 

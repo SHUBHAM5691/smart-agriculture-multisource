@@ -33,5 +33,15 @@
     "state": "Tamil Nadu",
     "publication_year": 2020,
     "default_topics": ["horticulture", "crop production"]
+  },
+  {
+    "id": "icar_kharif_agro_advisories_2025",
+    "name": "ICAR Kharif Agro-Advisories for Farmers 2025",
+    "url": "https://icar.gov.in/sites/default/files/Circulars/ICAR%20En-Kharif%20Agro-Advisories%20for%20Farmers%202025.pdf",
+    "kind": "state_sectioned_pdf",
+    "scope": "India",
+    "season": "Kharif",
+    "publication_year": 2025,
+    "default_topics": ["seasonal advisory", "crop production"]
   }
 ]

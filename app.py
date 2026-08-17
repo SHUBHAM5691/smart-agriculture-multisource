@@ -1,7 +1,13 @@
 import pandas as pd
 import streamlit as st
 
+try:
+    from streamlit_geolocation import streamlit_geolocation
+except ImportError:  # Keep manual location available if the optional component is unavailable.
+    streamlit_geolocation = None
+
 from memory.session_manager import clear_session, get_prediction, initialize_session
+from location.service import LocationError, normalize_state, reverse_geocode
 from orchestrator.workflow import answer_question, generate_prediction
 from rag.knowledge_base import prepare_vector_index
 from utils.config import settings
@@ -25,6 +31,191 @@ DEFAULT_VALUES = {
     "yield_rainfall": 1200.0, "yield_fertilizer": 100.0, "yield_pesticide": 10.0,
 }
 
+PRESETS = {
+    "Crop": {
+        "Rice-like conditions": {
+            "crop_n": 90.0, "crop_p": 42.0, "crop_k": 43.0,
+            "crop_temperature": 25.0, "crop_humidity": 80.0,
+            "crop_ph": 6.5, "crop_rainfall": 200.0,
+        },
+        "Maize-like conditions": {
+            "crop_n": 78.0, "crop_p": 45.0, "crop_k": 20.0,
+            "crop_temperature": 24.0, "crop_humidity": 65.0,
+            "crop_ph": 6.4, "crop_rainfall": 85.0,
+        },
+    },
+    "Fertilizer": {
+        "Rice nutrient example": {
+            "fert_soil_ph": 6.2, "fert_soil_moisture": 35.0,
+            "fert_organic_carbon": 1.0, "fert_ec": 0.2,
+            "fert_nitrogen": 80.0, "fert_phosphorus": 40.0,
+            "fert_potassium": 50.0, "fert_temperature": 28.0,
+            "fert_humidity": 70.0, "fert_rainfall": 180.0,
+            "fert_soil_type": "Clay", "fert_crop_type": "Rice",
+            "fert_season": "Kharif", "fert_growth_stage": "Vegetative",
+            "fert_irrigation": "Canal", "fert_previous_crop": "Wheat",
+            "fert_region": "South", "fert_used_last": 100.0,
+            "fert_yield_last": 3.0,
+        },
+    },
+    "Yield": {
+        "Rice retrospective example": {
+            "yield_crop": "Rice", "yield_season": "Kharif     ",
+            "yield_state": "Tamil Nadu", "yield_year": 2024,
+            "yield_area": 1.0, "yield_production": 1.0,
+            "yield_rainfall": 1200.0, "yield_fertilizer": 100.0,
+            "yield_pesticide": 10.0,
+        },
+    },
+}
+
+INDIAN_STATES = [
+    "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+    "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
+    "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
+    "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
+    "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
+    "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu",
+    "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry",
+]
+
+
+def location_inputs() -> dict:
+    with st.expander("📍 Location for advisory (optional)", expanded=False):
+        st.caption(
+            "State is required to personalise document and live-weather advice. It is not used as a "
+            "feature by prediction models that were not trained with location."
+        )
+        latitude = longitude = accuracy = None
+        saved_detection = st.session_state.get("detected_advisory_location") or {}
+        detected_state = saved_detection.get("state")
+        detected_district = saved_detection.get("district")
+        share_location = st.checkbox(
+            "I agree to share my current coordinates and use OpenStreetMap to detect my state and district",
+            key="share_current_location",
+        )
+        if share_location:
+            st.caption(
+                "Click the location button below and approve the browser prompt. The coordinates "
+                "are sent to OpenStreetMap Nominatim only to identify the state and district."
+            )
+            if streamlit_geolocation is None:
+                st.warning("Current-location support is unavailable. Select the state manually.")
+            else:
+                result = streamlit_geolocation()
+                if isinstance(result, dict) and result.get("latitude") is not None:
+                    latitude = float(result["latitude"])
+                    longitude = float(result["longitude"])
+                    accuracy = result.get("accuracy")
+                    try:
+                        resolved = reverse_geocode(latitude, longitude)
+                        detected_state = normalize_state(resolved.get("state"), INDIAN_STATES)
+                        detected_district = resolved.get("district")
+                        st.session_state["detected_advisory_location"] = {
+                            "state": detected_state,
+                            "district": detected_district,
+                            "latitude": latitude,
+                            "longitude": longitude,
+                            "accuracy": accuracy,
+                        }
+                        if detected_state:
+                            st.success(
+                                "Detected location: "
+                                f"{detected_district + ', ' if detected_district else ''}{detected_state}"
+                            )
+                        else:
+                            st.warning("Coordinates were received, but the state could not be identified.")
+                    except LocationError as exc:
+                        st.warning(f"Coordinates were received, but automatic place detection failed. {exc}")
+                else:
+                    st.warning(
+                        "The browser has not returned coordinates. Check location permission, "
+                        "or use the coordinate/manual fallback below."
+                    )
+            with st.expander("Coordinate fallback", expanded=False):
+                st.caption(
+                    "If this embedded browser cannot share GPS, paste latitude and longitude "
+                    "from your phone's Maps application and detect the place automatically."
+                )
+                lat_col, lon_col = st.columns(2)
+                manual_latitude = lat_col.number_input(
+                    "Latitude", min_value=-90.0, max_value=90.0,
+                    value=None, format="%.6f", key="manual_latitude",
+                )
+                manual_longitude = lon_col.number_input(
+                    "Longitude", min_value=-180.0, max_value=180.0,
+                    value=None, format="%.6f", key="manual_longitude",
+                )
+                if st.button("Detect state and district from coordinates"):
+                    if manual_latitude is None or manual_longitude is None:
+                        st.error("Enter both latitude and longitude.")
+                    else:
+                        try:
+                            resolved = reverse_geocode(float(manual_latitude), float(manual_longitude))
+                            detected_state = normalize_state(resolved.get("state"), INDIAN_STATES)
+                            detected_district = resolved.get("district")
+                            latitude, longitude = float(manual_latitude), float(manual_longitude)
+                            st.session_state["detected_advisory_location"] = {
+                                "state": detected_state,
+                                "district": detected_district,
+                                "latitude": latitude,
+                                "longitude": longitude,
+                                "accuracy": None,
+                            }
+                            st.success(
+                                "Detected location: "
+                                f"{detected_district + ', ' if detected_district else ''}{detected_state}"
+                            )
+                        except LocationError as exc:
+                            st.error(str(exc))
+        else:
+            st.session_state.pop("detected_advisory_location", None)
+            detected_state = detected_district = None
+        if saved_detection and latitude is None:
+            latitude = saved_detection.get("latitude")
+            longitude = saved_detection.get("longitude")
+            accuracy = saved_detection.get("accuracy")
+        manual_state = st.selectbox(
+            "State or Union Territory (manual fallback or correction)",
+            ["Not specified", *INDIAN_STATES],
+            key="advisory_state",
+        )
+        manual_district = st.text_input(
+            "District (manual fallback or correction)",
+            key="advisory_district",
+            placeholder="Example: Nagpur",
+        ).strip()
+        state = manual_state if manual_state != "Not specified" else detected_state
+        district = manual_district or detected_district
+        if not state:
+            st.error("State is required. Share coordinates or select the state manually.")
+        else:
+            st.write(f"Advisory location: **{district + ', ' if district else ''}{state}**")
+    return {
+        "advisory_state": state,
+        "advisory_district": district or None,
+        "latitude": latitude,
+        "longitude": longitude,
+        "location_accuracy_m": accuracy,
+    }
+
+
+def preset_picker(prediction_type: str) -> None:
+    choices = ["Enter manually", *PRESETS[prediction_type]]
+    left, right = st.columns([3, 1])
+    selected = left.selectbox(
+        "Load a preset example (optional)", choices,
+        key=f"{prediction_type.lower()}_preset_choice",
+    )
+    if right.button("Apply preset", key=f"apply_{prediction_type.lower()}_preset", width="stretch"):
+        if selected == "Enter manually":
+            st.info("Enter or edit the values in the form below.")
+        else:
+            for key, value in PRESETS[prediction_type][selected].items():
+                st.session_state[key] = value
+            st.rerun()
+    st.caption("Presets are demonstration inputs only; verify actual field measurements before use.")
+
 
 def number(label: str, key: str, minimum: float, maximum: float, step: float = 1.0):
     default = DEFAULT_VALUES.get(key, minimum)
@@ -44,6 +235,7 @@ def select(label: str, options: list[str], key: str):
 
 
 def crop_form() -> dict | None:
+    preset_picker("Crop")
     with st.form("crop_inputs"):
         st.subheader("Crop prediction inputs")
         left, right = st.columns(2)
@@ -71,6 +263,7 @@ def crop_form() -> dict | None:
 
 
 def fertilizer_form() -> dict | None:
+    preset_picker("Fertilizer")
     with st.form("fertilizer_inputs"):
         st.subheader("Fertilizer prediction inputs")
         left, right = st.columns(2)
@@ -117,6 +310,7 @@ def fertilizer_form() -> dict | None:
 
 
 def yield_form() -> dict | None:
+    preset_picker("Yield")
     with st.form("yield_inputs"):
         st.subheader("Yield prediction inputs")
         crop = select("Crop", ["Arecanut", "Arhar/Tur", "Bajra", "Banana", "Barley", "Cotton(lint)", "Maize", "Rice", "Sugarcane", "Wheat", "Potato"], "yield_crop")
@@ -211,9 +405,12 @@ def main() -> None:
             index=None, horizontal=True, key="prediction_type_choice",
         )
         inputs = None
+        advisory_location = {}
         if prediction_type == "Crop":
+            advisory_location = location_inputs()
             inputs = crop_form()
         elif prediction_type == "Fertilizer":
+            advisory_location = location_inputs()
             inputs = fertilizer_form()
         elif prediction_type == "Yield":
             st.warning(
@@ -223,8 +420,12 @@ def main() -> None:
             )
             inputs = yield_form()
         if inputs is not None:
-            run_prediction(inputs)
-            st.rerun()
+            if prediction_type in {"Crop", "Fertilizer"} and not advisory_location.get("advisory_state"):
+                st.error("Select or detect your state before generating the prediction.")
+            else:
+                inputs.update(advisory_location)
+                run_prediction(inputs)
+                st.rerun()
 
     with st.sidebar:
         st.header("Session")

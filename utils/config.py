@@ -12,7 +12,7 @@ def _env_flag(name: str, default: bool = False) -> bool:
 class Settings:
     groq_api_key: str = os.getenv("GROQ_API_KEY", "")
     groq_base_url: str = os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1")
-    groq_model: str = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+    groq_model: str = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
     groq_timeout: int = int(os.getenv("GROQ_TIMEOUT", "60"))
     groq_max_retries: int = int(os.getenv("GROQ_MAX_RETRIES", "3"))
     groq_retry_backoff: float = float(os.getenv("GROQ_RETRY_BACKOFF", "1.0"))
